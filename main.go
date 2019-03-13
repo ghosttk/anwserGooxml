@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
     "regexp"
+    "io/ioutil"
 
 	"baliance.com/gooxml/document"
 )
@@ -15,7 +16,8 @@ func main() {
 	}
 
     regexpNumber:= regexp.MustCompile(`\d\.$`)
-    //regexpAnswer:= regexp.MustCompile(`【答案】`)
+    regexpAnwser:= regexp.MustCompile(`【答案】`)
+    regexpJieXi:= regexp.MustCompile(`【解析】`)
 
 	paragraphs := []document.Paragraph{}
 	for _, p := range doc.Paragraphs() {
@@ -34,14 +36,29 @@ func main() {
             */
             rs := p.Runs()
             i := 0
+            bstart := false
+            var anwserSlice []string
             for i=0; i<len(rs); i++ {
                 r := rs[i]
                 m := regexpNumber.MatchString(r.Text())
                 if (m) {
-                    fmt.Println(r.Text())
+                    rn := rs[i+1]
+                    n := regexpAnwser.MatchString(rn.Text())
+                    if (n) {
+                            bstart = true
+                    }
                 }
-
+                bjieXi := regexpJieXi.MatchString(r.Text())
+                if (bjieXi) {
+                        bstart = false
+                }
+                if (bstart) {
+                        data := []byte(r.Text())
+                        err := ioutil.WriteFile("anwser.txt", data, 0644)
+                        anwserSlice = append(anwserSlice, r.Text())
+                } 
             }
+            fmt.Println(anwserSlice)
 	}
 
 	doc.SaveToFile("edit-document.docx")
