@@ -11,7 +11,9 @@ import (
 )
 
 func main() {
-	doc, err := document.Open("document.docx")
+    argsWithoutProg := os.Args[1:] 
+    docName := argsWithoutProg[0]
+	doc, err := document.Open(docName)
 	if err != nil {
 		log.Fatalf("error opening document: %s", err)
 	}
@@ -64,10 +66,10 @@ func main() {
 	}
 	fmt.Println(strAnwser)
 	data := []byte(strAnwser)
-	err = ioutil.WriteFile("anwser.txt", data, os.ModeAppend)
+	err = ioutil.WriteFile(docName+"anwser.txt", data, os.ModeAppend)
 	if err != nil {
 		panic(err)
 	}
 
-	doc.SaveToFile("edit-document.docx")
+	doc.SaveToFile(docName+"edit-document.docx")
 }
